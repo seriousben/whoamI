@@ -1,36 +1,22 @@
-package main
+package server
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"sync"
 
-	"github.com/gorilla/websocket"
-	// "github.com/pkg/profile"
 	"log"
 	"net"
 	"net/http"
 	"net/url"
 	"os"
 	"time"
+
+	"github.com/seriousben/whoamI/server/websocket"
 )
 
-var port string
-
-func init() {
-	flag.StringVar(&port, "port", "80", "give me a port number")
-}
-
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
-
-func main() {
-	// defer profile.Start().Stop()
-	flag.Parse()
-	http.HandleFunc("/echo", echoHandler)
+func Start(port string) {
+	http.HandleFunc("/echo", websocket.EchoHandler)
 	http.HandleFunc("/bench", benchHandler)
 	http.HandleFunc("/", whoamI)
 	http.HandleFunc("/api", api)
@@ -39,36 +25,11 @@ func main() {
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
-func printBinary(s []byte) {
-	fmt.Printf("Received b:")
-	for n := 0; n < len(s); n++ {
-		fmt.Printf("%d,", s[n])
-	}
-	fmt.Printf("\n")
-}
 func benchHandler(w http.ResponseWriter, r *http.Request) {
 	// body := "Hello World\n"
 	w.Header().Set("Connection", "keep-alive")
 	w.Header().Set("Content-Type", "text/plain")
 	// fmt.Fprint(w, body)
-}
-func echoHandler(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	for {
-		messageType, p, err := conn.ReadMessage()
-		if err != nil {
-			return
-		}
-		printBinary(p)
-		err = conn.WriteMessage(messageType, p)
-		if err != nil {
-			return
-		}
-	}
 }
 
 func whoamI(w http.ResponseWriter, req *http.Request) {
