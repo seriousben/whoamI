@@ -1,5 +1,7 @@
 # whoamI
 
+[![Docker Automated build](https://img.shields.io/docker/automated/seriousben/whoami.svg)](https://hub.docker.com/r/seriousben/whoami/)
+
 Tiny Go webserver that prints os information and HTTP request to output
 
 ```sh
